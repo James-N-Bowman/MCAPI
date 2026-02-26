@@ -13,7 +13,7 @@ DATA_CENTRE = os.environ['DATA_CENTRE']
 AUDIENCE_ID = os.environ['AUDIENCE_ID']
 
 FROM_NAME = "Automated Reports"
-REPLY_TO = "noreply@example.com"
+REPLY_TO = "committeecorridor@email.parliament.uk"
 SUBJECT = "Automated Committee Update"
 
 # Very small HTML body for proof-of-concept
@@ -22,7 +22,7 @@ HTML_BODY = """
 <html>
   <body>
     <h1>Committee Update</h1>
-    <p>This email was sent automatically from a GitHub Action.</p>
+    <p>This email was sent to the RSS tag.</p>
     <ul>
       <li>Item A</li>
       <li>Item B</li>
@@ -33,7 +33,7 @@ HTML_BODY = """
 
 BASE_URL = f"https://{DATA_CENTRE}.api.mailchimp.com/3.0"
 
-AUTH = ("anystring", API_KEY)  # Mailchimp uses HTTP Basic Auth
+AUTH = ("jbanystring", API_KEY)  # Mailchimp uses HTTP Basic Auth
 
 
 # =========================
@@ -73,24 +73,42 @@ def mailchimp_post_no_body(path):
 # MAIN FLOW
 # =========================
 
-def main():
-    # 1. Create campaign
-    campaign = mailchimp_post(
-        "/campaigns",
-        {
-            "type": "regular",
-            "recipients": {
-                "list_id": AUDIENCE_ID
-            },
-            "settings": {
-                "subject_line": SUBJECT,
-                "from_name": FROM_NAME,
-                "reply_to": REPLY_TO
-            }
-        }
-    )
 
-    campaign_id = campaign["id"]
+
+def main(campaign_ids):
+    # 1. Create campaign
+    if campaign_ids == []: 
+        campaign = mailchimp_post(
+            "/campaigns",
+            {
+                "type": "regular",
+                "recipients": {
+                    "list_id": AUDIENCE_ID,
+                    "segment_opts": {
+                        "match": "all",
+                        "conditions": [
+                            {
+                                "condition_type": "StaticSegment",
+                                "field": "static_segment",
+                                "op": "static_is",
+                                "value": 8339259  # integer ID of the tag
+                            }
+                        ]
+                    }
+                },
+                "settings": {
+                    "title": "Brand new campaign 4",
+                    "subject_line": SUBJECT,
+                    "from_name": FROM_NAME,
+                    "reply_to": REPLY_TO
+                }
+            }
+        )
+        campaign_id = campaign["id"]
+    else:
+        campaign_id = campaign_ids[0]
+
+    
     print(f"Created campaign: {campaign_id}")
 
     # 2. Set HTML content
@@ -112,4 +130,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    campaigns = ["923dd33776"]
+    main(campaigns)
