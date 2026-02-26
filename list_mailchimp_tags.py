@@ -24,7 +24,7 @@ if not API_KEY or not DATA_CENTRE or not AUDIENCE_ID:
     sys.exit(2)
 
 BASE_URL = f"https://{DATA_CENTRE}.api.mailchimp.com/3.0"
-AUTH     = ("anystring", API_KEY)
+AUTH     = ("anyOldString", API_KEY)
 TIMEOUT  = 30
 PAGE_SIZE = 1000  # use large pages to minimize round-trips
 
