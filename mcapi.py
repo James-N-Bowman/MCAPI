@@ -1,14 +1,16 @@
-import requests
+import os
 import json
 import sys
+
+import requests
 
 # =========================
 # CONFIGURATION
 # =========================
 
-API_KEY = "YOUR_API_KEY_HERE"
-DATACENTER = "usX"  # e.g. us21 (from API key suffix)
-AUDIENCE_ID = "YOUR_AUDIENCE_ID_HERE"
+API_KEY = os.environ['API_KEY']
+DATA_CENTRE = os.environ['DATA_CENTRE']
+AUDIENCE_ID = os.environ['AUDIENCE_ID']
 
 FROM_NAME = "Automated Reports"
 REPLY_TO = "noreply@example.com"
@@ -29,7 +31,7 @@ HTML_BODY = """
 </html>
 """
 
-BASE_URL = f"https://{DATACENTER}.api.mailchimp.com/3.0"
+BASE_URL = f"https://{DATA_CENTRE}.api.mailchimp.com/3.0"
 
 AUTH = ("anystring", API_KEY)  # Mailchimp uses HTTP Basic Auth
 
