@@ -1,16 +1,4 @@
-import json
-import sys
-
-from dapMailChimp import *
-
-import requests
-
-# =========================
-# CONFIGURATION
-# =========================
-
-
-
+from helpersMailChimp import *
 
 # Very small HTML body for proof-of-concept
 HTML_BODY = """
@@ -45,7 +33,7 @@ def main(campaign_id):
     print("Uploaded HTML content")
 
     # 3. Send campaign
-    mailchimp_post_no_body(
+    mailchimp_post(
         f"/campaigns/{campaign_id}/actions/send"
     )
 

@@ -1,46 +1,62 @@
-#!/usr/bin/env python3
-"""
-List Mailchimp tags, campaigns, groups (interest categories + interests),
-and segments for a given audience.
-
-Outputs CSV-style sections to stdout.
-
-Env vars:
-  MAILCHIMP_API_KEY       - e.g. 'abcd1234-us21'
-  MAILCHIMP_DATA_CENTRE    - e.g. 'us21'
-  MAILCHIMP_AUDIENCE_ID   - e.g. 'a1b2c3d4e5'
-"""
-
+import logging
 import os
-import sys
 import requests
+import sys
 
 API_KEY = os.environ['API_KEY']
 DATA_CENTRE = os.environ['DATA_CENTRE']
 AUDIENCE_ID = os.environ['AUDIENCE_ID']
 
-if not API_KEY or not DATA_CENTRE or not AUDIENCE_ID:
-    print("Please set MAILCHIMP_API_KEY, MAILCHIMP_DATA_CENTRE, MAILCHIMP_AUDIENCE_ID", file=sys.stderr)
-    sys.exit(2)
-
+GROUP_ID = "3da1d0b028"
 BASE_URL = f"https://{DATA_CENTRE}.api.mailchimp.com/3.0"
-AUTH     = ("anyOldString", API_KEY)
+AUTH = ("jbanystring", API_KEY)  # Mailchimp uses HTTP Basic Auth
+
 TIMEOUT  = 30
 PAGE_SIZE = 1000  # use large pages to minimize round-trips
 
-def _get(path, params=None):
-    url = f"{BASE_URL}{path}"
-    r = requests.get(url, auth=AUTH, params=params or {}, timeout=TIMEOUT)
-    if not r.ok:
-        raise SystemExit(f"GET {path} failed: {r.status_code} {r.text}")
-    return r.json()
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
+# =========================
+# GET, PUSH, PUT HELPERS
+# =========================
+
+def mailchimp_request(method, path, payload=None, params=None):
+    url = BASE_URL + path
+    logger.info("Fetching: %s", url)
+    response = requests.request(
+        method,
+        url,
+        auth=AUTH,
+        json=payload,
+        params=params or {},
+        timeout=TIMEOUT,
+    )
+    if not response.ok:
+        logger.debug(f"{method.upper()} {path} failed:")
+        logger.debug(response.status_code, response.text)
+        sys.exit(1)
+    return response.json() if response.content else None
+
+def mailchimp_get(path, params=None):
+    return mailchimp_request("GET", path, params=params)
+
+def mailchimp_post(path, payload=None):
+    return mailchimp_request("POST", path, payload=payload)
+
+def mailchimp_put(path, payload):
+    return mailchimp_request("PUT", path, payload=payload)
+
+# =========================
+# FETCH HELPERS
+# =========================
 
 def fetch_all_tags(list_id):
     """GET /lists/{list_id}/tag-search with pagination (count/offset)."""
     tags = []
     offset = 0
     while True:
-        data = _get(f"/lists/{list_id}/tag-search", params={"count": PAGE_SIZE, "offset": offset})
+        data = mailchimp_get(f"/lists/{list_id}/tag-search", params={"count": PAGE_SIZE, "offset": offset})
         batch = data.get("tags", [])
         tags.extend(batch)
         if len(batch) < PAGE_SIZE:
@@ -53,7 +69,7 @@ def fetch_all_campaigns():
     items = []
     offset = 0
     while True:
-        data = _get("/campaigns", params={"count": PAGE_SIZE, "offset": offset})
+        data = mailchimp_get("/campaigns", params={"count": PAGE_SIZE, "offset": offset})
         batch = data.get("campaigns", [])
         items.extend(batch)
         if len(batch) < PAGE_SIZE:
@@ -61,12 +77,13 @@ def fetch_all_campaigns():
         offset += PAGE_SIZE
     return items
 
+
 def fetch_interest_categories(list_id):
     """GET /lists/{list_id}/interest-categories (groups)."""
     cats = []
     offset = 0
     while True:
-        data = _get(f"/lists/{list_id}/interest-categories", params={"count": PAGE_SIZE, "offset": offset})
+        data = mailchimp_get(f"/lists/{list_id}/interest-categories", params={"count": PAGE_SIZE, "offset": offset})
         batch = data.get("categories", [])
         cats.extend(batch)
         if len(batch) < PAGE_SIZE:
@@ -79,7 +96,7 @@ def fetch_interests(list_id, interest_category_id):
     interests = []
     offset = 0
     while True:
-        data = _get(
+        data = mailchimp_get(
             f"/lists/{list_id}/interest-categories/{interest_category_id}/interests",
             params={"count": PAGE_SIZE, "offset": offset},
         )
@@ -95,7 +112,7 @@ def fetch_all_segments(list_id):
     segs = []
     offset = 0
     while True:
-        data = _get(f"/lists/{list_id}/segments", params={"count": PAGE_SIZE, "offset": offset})
+        data = mailchimp_get(f"/lists/{list_id}/segments", params={"count": PAGE_SIZE, "offset": offset})
         batch = data.get("segments", [])
         segs.extend(batch)
         if len(batch) < PAGE_SIZE:
@@ -103,8 +120,11 @@ def fetch_all_segments(list_id):
         offset += PAGE_SIZE
     return segs
 
-def main():
-    # 1) Tags
+# =========================
+# LIST FOR ME HELPERS
+# =========================
+
+def list_all_tags():
     tags = fetch_all_tags(AUDIENCE_ID)
     print("# TAGS (id,name)")
     print("id,name")
@@ -114,7 +134,8 @@ def main():
         print(f"{tag_id},\"{name}\"")
     print()
 
-    # 2) Campaigns
+
+def list_all_campaigns():
     campaigns = fetch_all_campaigns()
     print("# CAMPAIGNS (id,title,subject_line,status)")
     print("id,title,subject_line,status")
@@ -127,7 +148,7 @@ def main():
         print(f"{cid},\"{title}\",\"{subj}\",{status}")
     print()
 
-    # 3) Groups (Interest Categories + Interests)
+def list_all_groups():
     print("# GROUPS (category_id,category_title,interest_id,interest_name)")
     print("category_id,category_title,interest_id,interest_name")
     cats = fetch_interest_categories(AUDIENCE_ID)
@@ -145,7 +166,7 @@ def main():
                 print(f"{cat_id},\"{cat_title}\",{iid},\"{iname}\"")
     print()
 
-    # 4) Segments
+def list_all_segments():
     segs = fetch_all_segments(AUDIENCE_ID)
     print("# SEGMENTS (id,name,type)")
     print("id,name,type")
@@ -155,5 +176,51 @@ def main():
         stype = s.get("type") or ""  # 'saved', 'static', 'fuzzy', etc. depends on account
         print(f"{sid},\"{name}\",{stype}")
 
-if __name__ == "__main__":
-    main()
+# =========================
+# CREATION HELPERS
+# =========================
+
+def create_group_interest(name):
+    """
+    Adds an individual interest (option) inside a Group Category.
+    
+    :param audience_id: The ID of the audience/list
+    :param group_id: The ID of the interest category (group) returned from create_group()
+    :param name: The name of the interest option (e.g. "Football", "Basketball")
+    """
+    interest = mailchimp_post(
+        f"/lists/{AUDIENCE_ID}/interest-categories/{GROUP_ID}/interests",
+        {
+            "name": name
+        }
+    )
+    return interest
+
+def create_campaign(interest_id, subject, from_name, reply_to):
+    campaign = mailchimp_post(
+        "/campaigns",
+        {
+            "type": "regular",
+            "recipients": {
+                "list_id": AUDIENCE_ID,
+                "segment_opts": {
+                    "match": "all",
+                    "conditions": [
+                        {
+                            "condition_type": "StaticSegment",
+                            "field": "static_segment",
+                            "op": "static_is",
+                            "value": interest_id  # integer ID of the tag
+                        }
+                    ]
+                }
+            },
+            "settings": {
+                "title": "Brand new campaign 4",
+                "subject_line": subject,
+                "from_name": from_name,
+                "reply_to": reply_to
+            }
+        }
+    )
+    return (campaign)

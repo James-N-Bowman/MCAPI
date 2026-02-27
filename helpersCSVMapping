@@ -1,0 +1,122 @@
+import csv
+import os
+
+MAPPING_CSV_FILEPATH = 'mapping.csv'
+
+def check_CSV_for_duplicates(filepath: str, cttee_id: int, campaign_id: str, interest_id: str) -> bool:
+    """
+    Checks whether any of the three values already exist in their respective
+    columns in an existing CSV file. Also verifies the file can be opened for
+    writing.
+
+    Returns True if the entry can safely be written (no duplicates found),
+    False if a duplicate exists or the file cannot be accessed.
+
+    Args:
+        filepath    : Path to an existing CSV file.
+        cttee_id    : Committee ID (integer).
+        campaign_id : Campaign ID (string).
+        interest_id : Interest ID (string).
+    """
+
+    # Check the file can be opened for writing
+    try:
+        with open(filepath, "a", newline="") as f:
+            pass  # just test write access
+    except OSError as e:
+        print(f"Error: File '{filepath}' cannot be opened for writing: {e}")
+        return False
+
+    # Read existing rows
+    try:
+        with open(filepath, "r", newline="") as f:
+            reader = csv.reader(f)
+            rows = list(reader)
+    except OSError as e:
+        print(f"Error: Could not read file '{filepath}': {e}")
+        return False
+
+    # Skip header row when checking for duplicates
+    data_rows = rows[1:] if rows else []
+
+    for row in data_rows:
+        if len(row) < 3:
+            continue  # skip malformed rows
+
+        try:
+            if int(row[0]) == cttee_id:
+                print(f"Error: cttee_id '{cttee_id}' already exists in the file.")
+                return False
+        except ValueError:
+            pass  # non-integer in column; skip comparison
+
+        if row[1] == campaign_id:
+            print(f"Error: campaign_id '{campaign_id}' already exists in the file.")
+            return False
+
+        if row[2] == interest_id:
+            print(f"Error: interest_id '{interest_id}' already exists in the file.")
+            return False
+
+    return True
+
+def create_mapping_CSV (filepath: str):
+    """
+    If the file does not exist, creates it with a header row then writes the new
+    row. 
+    """
+
+    file_exists = os.path.exists(filepath)
+
+    if not file_exists:
+        try:
+            with open(filepath, "w", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(["cttee_id", "campaign_id", "interest_id"])
+            print(f"Created '{filepath}' and wrote new row successfully.")
+        except OSError as e:
+            print(f"Error: Could not create file at '{filepath}': {e}")
+        return    
+
+def write_to_mapping_CSV(filepath: str, cttee_id: int, campaign_id: str, interest_id: str) -> None:
+    """
+    Writes a new row (cttee_id, campaign_id, interest_id) to a CSV file.
+
+    Args:
+        filepath    : Path to the CSV file.
+        cttee_id    : Committee ID (integer).
+        campaign_id : Campaign ID (string).
+        interest_id : Interest ID (string).
+    """
+
+    try:
+        with open(filepath, "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([cttee_id, campaign_id, interest_id])
+        print(f"Row written successfully to '{filepath}'.")
+    except OSError as e:
+        print(f"Error: Could not write to file '{filepath}': {e}")
+
+
+def update_mapping_CSV(filepath: str, cttee_id: int, campaign_id: str, interest_id: str) -> None:
+    """
+    Writes a new row (cttee_id, campaign_id, interest_id) to a CSV file.
+
+    - If the file does not exist, creates it with a header row.
+    - If the file exists but cannot be opened for writing, reports the problem and returns.
+    - Before writing to an existing file, checks that none of the three values already
+      exist in their respective columns; if a duplicate is found, reports and returns.
+    - Otherwise, appends the new row.
+
+    Args:
+        filepath    : Path to the CSV file (must end in .csv).
+        cttee_id    : Committee ID (integer).
+        campaign_id : Campaign ID (string).
+        interest_id : Interest ID (string).
+    """
+    create_mapping_CSV(filepath)
+
+    if check_CSV_for_duplicates(filepath, cttee_id, campaign_id, interest_id):
+        return
+
+    write_to_mapping_CSV(filepath, cttee_id, campaign_id, interest_id)
