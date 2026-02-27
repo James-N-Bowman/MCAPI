@@ -14,8 +14,12 @@ AUTH = ("jbanystring", API_KEY)  # Mailchimp uses HTTP Basic Auth
 TIMEOUT  = 30
 PAGE_SIZE = 1000  # use large pages to minimize round-trips
 
+DEFAULT_FROM_NAME = "Automated Reports"
+DEFAULT_REPLY_TO = "committeecorridor@parliament.uk"
+DEFAULT_SUBJECT = "Automated Committee Update"
+
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 # =========================
 # GET, PUSH, PUT HELPERS
@@ -148,7 +152,7 @@ def list_all_campaigns():
         print(f"{cid},\"{title}\",\"{subj}\",{status}")
     print()
 
-def list_all_groups():
+def list_all_groups_and_interests():
     print("# GROUPS (category_id,category_title,interest_id,interest_name)")
     print("category_id,category_title,interest_id,interest_name")
     cats = fetch_interest_categories(AUDIENCE_ID)
@@ -196,7 +200,7 @@ def create_group_interest(name):
     )
     return interest
 
-def create_campaign(interest_id, subject, from_name, reply_to):
+def create_campaign(interest_id, campaign_title, subject=DEFAULT_SUBJECT, from_name=DEFAULT_FROM_NAME, reply_to=DEFAULT_REPLY_TO):
     campaign = mailchimp_post(
         "/campaigns",
         {
@@ -207,16 +211,16 @@ def create_campaign(interest_id, subject, from_name, reply_to):
                     "match": "all",
                     "conditions": [
                         {
-                            "condition_type": "StaticSegment",
-                            "field": "static_segment",
-                            "op": "static_is",
-                            "value": interest_id  # integer ID of the tag
+                            "condition_type": "Interests",
+                            "field": f"interests-{GROUP_ID}",
+                            "op": "interestcontains",
+                            "value": [interest_id]  # integer ID of the tag
                         }
                     ]
                 }
             },
             "settings": {
-                "title": "Brand new campaign 4",
+                "title": campaign_title,
                 "subject_line": subject,
                 "from_name": from_name,
                 "reply_to": reply_to
@@ -224,3 +228,5 @@ def create_campaign(interest_id, subject, from_name, reply_to):
         }
     )
     return (campaign)
+
+list_all_campaigns()

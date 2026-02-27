@@ -3,7 +3,7 @@ import os
 
 MAPPING_CSV_FILEPATH = 'mapping.csv'
 
-def check_CSV_for_duplicates(filepath: str, cttee_id: int, campaign_id: str, interest_id: str) -> bool:
+def check_CSV_for_duplicates(cttee_id: int, campaign_id: str, interest_id: str) -> bool:
     """
     Checks whether any of the three values already exist in their respective
     columns in an existing CSV file. Also verifies the file can be opened for
@@ -13,7 +13,6 @@ def check_CSV_for_duplicates(filepath: str, cttee_id: int, campaign_id: str, int
     False if a duplicate exists or the file cannot be accessed.
 
     Args:
-        filepath    : Path to an existing CSV file.
         cttee_id    : Committee ID (integer).
         campaign_id : Campaign ID (string).
         interest_id : Interest ID (string).
@@ -21,26 +20,26 @@ def check_CSV_for_duplicates(filepath: str, cttee_id: int, campaign_id: str, int
 
     # Check the file can be opened for writing
     try:
-        with open(filepath, "a", newline="") as f:
+        with open(MAPPING_CSV_FILEPATH, "a", newline="") as f:
             pass  # just test write access
     except OSError as e:
-        print(f"Error: File '{filepath}' cannot be opened for writing: {e}")
+        print(f"Error: File '{MAPPING_CSV_FILEPATH}' cannot be opened for writing: {e}")
         return False
 
     # Read existing rows
     try:
-        with open(filepath, "r", newline="") as f:
+        with open(MAPPING_CSV_FILEPATH, "r", newline="") as f:
             reader = csv.reader(f)
             rows = list(reader)
     except OSError as e:
-        print(f"Error: Could not read file '{filepath}': {e}")
+        print(f"Error: Could not read file '{MAPPING_CSV_FILEPATH}': {e}")
         return False
 
     # Skip header row when checking for duplicates
     data_rows = rows[1:] if rows else []
 
     for row in data_rows:
-        if len(row) < 3:
+        if len(row) < 4:
             continue  # skip malformed rows
 
         try:
@@ -50,55 +49,54 @@ def check_CSV_for_duplicates(filepath: str, cttee_id: int, campaign_id: str, int
         except ValueError:
             pass  # non-integer in column; skip comparison
 
-        if row[1] == campaign_id:
+        if row[2] == campaign_id:
             print(f"Error: campaign_id '{campaign_id}' already exists in the file.")
             return False
 
-        if row[2] == interest_id:
+        if row[3] == interest_id:
             print(f"Error: interest_id '{interest_id}' already exists in the file.")
             return False
 
     return True
 
-def create_mapping_CSV (filepath: str):
+def create_mapping_CSV ():
     """
     If the file does not exist, creates it with a header row then writes the new
     row. 
     """
 
-    file_exists = os.path.exists(filepath)
+    file_exists = os.path.exists(MAPPING_CSV_FILEPATH)
 
     if not file_exists:
         try:
-            with open(filepath, "w", newline="") as f:
+            with open(MAPPING_CSV_FILEPATH, "w", newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow(["cttee_id", "campaign_id", "interest_id"])
-            print(f"Created '{filepath}' and wrote new row successfully.")
+                writer.writerow(["cttee_id", "cttee_name", "campaign_id", "interest_id"])
+            print(f"Created '{MAPPING_CSV_FILEPATH}' and wrote new row successfully.")
         except OSError as e:
-            print(f"Error: Could not create file at '{filepath}': {e}")
+            print(f"Error: Could not create file at '{MAPPING_CSV_FILEPATH}': {e}")
         return    
 
-def write_to_mapping_CSV(filepath: str, cttee_id: int, campaign_id: str, interest_id: str) -> None:
+def write_to_mapping_CSV(cttee_id: int, cttee_name: str, campaign_id: str, interest_id: str) -> None:
     """
     Writes a new row (cttee_id, campaign_id, interest_id) to a CSV file.
 
     Args:
-        filepath    : Path to the CSV file.
         cttee_id    : Committee ID (integer).
         campaign_id : Campaign ID (string).
         interest_id : Interest ID (string).
     """
 
     try:
-        with open(filepath, "a", newline="") as f:
+        with open(MAPPING_CSV_FILEPATH, "a", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow([cttee_id, campaign_id, interest_id])
-        print(f"Row written successfully to '{filepath}'.")
+            writer.writerow([cttee_id, cttee_name, campaign_id, interest_id])
+        print(f"Row written successfully to '{MAPPING_CSV_FILEPATH}'.")
     except OSError as e:
-        print(f"Error: Could not write to file '{filepath}': {e}")
+        print(f"Error: Could not write to file '{MAPPING_CSV_FILEPATH}': {e}")
 
 
-def update_mapping_CSV(filepath: str, cttee_id: int, campaign_id: str, interest_id: str) -> None:
+def update_mapping_CSV(cttee_id: int, campaign_id: str, interest_id: str) -> None:
     """
     Writes a new row (cttee_id, campaign_id, interest_id) to a CSV file.
 
@@ -109,14 +107,13 @@ def update_mapping_CSV(filepath: str, cttee_id: int, campaign_id: str, interest_
     - Otherwise, appends the new row.
 
     Args:
-        filepath    : Path to the CSV file (must end in .csv).
         cttee_id    : Committee ID (integer).
         campaign_id : Campaign ID (string).
         interest_id : Interest ID (string).
     """
-    create_mapping_CSV(filepath)
+    create_mapping_CSV()
 
-    if check_CSV_for_duplicates(filepath, cttee_id, campaign_id, interest_id):
+    if check_CSV_for_duplicates(cttee_id, campaign_id, interest_id):
         return
 
-    write_to_mapping_CSV(filepath, cttee_id, campaign_id, interest_id)
+    write_to_mapping_CSV(cttee_id, campaign_id, interest_id)
