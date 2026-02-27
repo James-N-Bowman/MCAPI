@@ -19,27 +19,19 @@ HTML_BODY = """
 # MAIN FLOW
 # =========================
 
-def main(campaign_id):
+def send_html_to_campaign (campaign_id, html):
+    
+    content_path = f"/campaigns/{campaign_id}/content" 
+    payload = {"html": html}
+    mailchimp_put(content_path, payload)
 
-
-    # 2. Set HTML content
-    mailchimp_put(
-        f"/campaigns/{campaign_id}/content",
-        {
-            "html": HTML_BODY
-        }
-    )
-
-    print("Uploaded HTML content")
-
-    # 3. Send campaign
-    mailchimp_post(
-        f"/campaigns/{campaign_id}/actions/send"
-    )
+    send_path = f"/campaigns/{campaign_id}/actions/send"
+    mailchimp_post(send_path)
 
     print("Campaign sent successfully")
 
+def main():
+    send_html_to_campaign("a0ee568ff0",HTML_BODY)
 
 if __name__ == "__main__":
-    campaigns = ["923dd33776"]
-    main(campaigns)
+    main()

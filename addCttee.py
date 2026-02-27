@@ -25,7 +25,10 @@ def main():
     
     interest = create_group_interest(cttee_name)
     interest_id = interest.get("id")
-    create_campaign(interest_id, cttee_name)
+    campaign = create_campaign(interest_id, cttee_name)
+    campaign_id = campaign.get("id")
+
+    update_mapping_CSV(cttee_id, cttee_name, campaign_id, interest_id)
 
 if __name__ == "__main__":
     main()

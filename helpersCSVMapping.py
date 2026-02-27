@@ -37,8 +37,11 @@ def check_CSV_for_duplicates(cttee_id: int, campaign_id: str, interest_id: str) 
 
     # Skip header row when checking for duplicates
     data_rows = rows[1:] if rows else []
+    if len(data_rows)==0:
+        return False
 
     for row in data_rows:
+
         if len(row) < 4:
             continue  # skip malformed rows
 
@@ -96,7 +99,7 @@ def write_to_mapping_CSV(cttee_id: int, cttee_name: str, campaign_id: str, inter
         print(f"Error: Could not write to file '{MAPPING_CSV_FILEPATH}': {e}")
 
 
-def update_mapping_CSV(cttee_id: int, campaign_id: str, interest_id: str) -> None:
+def update_mapping_CSV(cttee_id: int, cttee_name: str, campaign_id: str, interest_id: str) -> None:
     """
     Writes a new row (cttee_id, campaign_id, interest_id) to a CSV file.
 
@@ -116,4 +119,4 @@ def update_mapping_CSV(cttee_id: int, campaign_id: str, interest_id: str) -> Non
     if check_CSV_for_duplicates(cttee_id, campaign_id, interest_id):
         return
 
-    write_to_mapping_CSV(cttee_id, campaign_id, interest_id)
+    write_to_mapping_CSV(cttee_id, cttee_name, campaign_id, interest_id)
