@@ -48,19 +48,19 @@ def check_CSV_for_duplicates(cttee_id: int, campaign_id: str, interest_id: str) 
         try:
             if int(row[0]) == cttee_id:
                 print(f"Error: cttee_id '{cttee_id}' already exists in the file.")
-                return False
+                return True
         except ValueError:
             pass  # non-integer in column; skip comparison
 
         if row[2] == campaign_id:
             print(f"Error: campaign_id '{campaign_id}' already exists in the file.")
-            return False
+            return True
 
         if row[3] == interest_id:
             print(f"Error: interest_id '{interest_id}' already exists in the file.")
-            return False
+            return True
 
-    return True
+    return False
 
 def create_mapping_CSV ():
     """

@@ -19,7 +19,7 @@ DEFAULT_REPLY_TO = "committeecorridor@parliament.uk"
 DEFAULT_SUBJECT = "Automated Committee Update"
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 # =========================
 # GET, PUSH, PUT HELPERS
@@ -28,6 +28,7 @@ logging.basicConfig(level=logging.INFO)
 def mailchimp_request(method, path, payload=None, params=None):
     url = BASE_URL + path
     logger.info("Fetching: %s", url)
+    print(method, url, AUTH, payload, params or {}, TIMEOUT, sep="\n")
     response = requests.request(
         method,
         url,
@@ -38,7 +39,7 @@ def mailchimp_request(method, path, payload=None, params=None):
     )
     if not response.ok:
         logger.debug(f"{method.upper()} {path} failed:")
-        logger.debug(response.status_code, response.text)
+        logger.error(f"Status: {response.status_code} - Error: {response.text}")
         sys.exit(1)
     return response.json() if response.content else None
 
