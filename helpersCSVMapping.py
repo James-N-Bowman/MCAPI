@@ -99,6 +99,15 @@ def write_to_mapping_CSV(cttee_id: int, cttee_name: str, campaign_id: str, inter
         print(f"Error: Could not write to file '{MAPPING_CSV_FILEPATH}': {e}")
 
 
+def fetch_cttee_ids_from_mapping_CSV ():
+    with open('mapping.csv', mode='r', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        next(reader)  # Skip the header row
+            
+        # Extract IDs from the first column
+        committee_ids = {int(row[0]) for row in reader if row}
+        return(committee_ids)
+
 def update_mapping_CSV(cttee_id: int, cttee_name: str, campaign_id: str, interest_id: str) -> None:
     """
     Writes a new row (cttee_id, campaign_id, interest_id) to a CSV file.

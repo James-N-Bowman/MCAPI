@@ -1,0 +1,263 @@
+{
+    "metadata": {
+        "extracted_at": "2026-03-02T13:24:50.607113+00:00",
+        "range": [
+            "2026-02-24",
+            "2026-03-02"
+        ]
+    },
+    "events": [
+        {
+            "id": 26563,
+            "name": null,
+            "startDate": "2026-02-24T14:00:00",
+            "endDate": "2026-02-24T17:00:00",
+            "cancelledDate": null,
+            "locationId": 3,
+            "location": "The Thatcher Room, Portcullis House",
+            "eventType": {
+                "id": 6,
+                "name": "Formal meeting (oral evidence session)",
+                "isVisit": false,
+                "description": "Formal meetings may be held in private (for example to consider a draft report) or in public (for example to hear oral evidence), and require a minimum number of members to be present."
+            },
+            "eventSource": "CIS",
+            "committees": [
+                {
+                    "contact": {
+                        "email": "justicecom@parliament.uk",
+                        "phone": "0207 219 3939 (general enquiries)",
+                        "address": "House of Commons, London SW1A 0AA",
+                        "contactDisclaimer": null
+                    },
+                    "id": 102,
+                    "name": "Justice Committee",
+                    "parentCommittee": null,
+                    "subCommittees": [],
+                    "house": "Commons",
+                    "leadHouse": null,
+                    "category": {
+                        "id": 1,
+                        "name": "Select"
+                    },
+                    "committeeTypes": [
+                        {
+                            "id": 1,
+                            "name": "(HC) Public Standing Orders - Departmental",
+                            "committeeCategory": {
+                                "id": 1,
+                                "name": "Select"
+                            }
+                        }
+                    ],
+                    "showOnWebsite": true,
+                    "websiteLegacyUrl": "https://old.parliament.uk/business/committees/committees-a-z/commons-select/justice-committee/",
+                    "websiteLegacyRedirectEnabled": false,
+                    "startDate": "2007-11-06T00:00:00",
+                    "endDate": null,
+                    "dateCommonsAppointed": "2020-03-02T00:00:00",
+                    "dateLordsAppointed": null,
+                    "scrutinisingDepartments": [],
+                    "isLeadCommittee": true,
+                    "nameHistory": [
+                        {
+                            "id": 100,
+                            "committeeId": 102,
+                            "name": "Justice Committee",
+                            "startDate": "2007-11-06T00:00:00",
+                            "endDate": null
+                        }
+                    ]
+                }
+            ],
+            "committeeBusinesses": [
+                {
+                    "id": 9286,
+                    "title": "Access to Justice",
+                    "type": {
+                        "id": 1,
+                        "name": "Inquiry",
+                        "isInquiry": true,
+                        "description": "Inquiries allow committees to consider oral and written evidence on a particular topic. They usually result in the publication of a report."
+                    },
+                    "openDate": "2025-07-23T00:00:00",
+                    "closeDate": null,
+                    "latestReport": null,
+                    "openSubmissionPeriods": [],
+                    "closedSubmissionPeriods": [],
+                    "nextOralEvidenceSession": null,
+                    "contact": {
+                        "email": "justicecom@parliament.uk",
+                        "phone": "0207 219 3939 (general enquiries)",
+                        "address": null,
+                        "contactDisclaimer": null
+                    }
+                }
+            ],
+            "childEvents": null,
+            "nextActivity": null,
+            "activities": [
+                {
+                    "committeeBusinesses": [],
+                    "oralEvidences": [],
+                    "id": 36216,
+                    "name": null,
+                    "startDate": "2026-02-24T14:00:00",
+                    "endDate": "2026-02-24T14:30:00",
+                    "eventId": 26563,
+                    "isPrivate": true,
+                    "activityType": "Private discussion",
+                    "attendees": []
+                },
+                {
+                    "committeeBusinesses": [
+                        {
+                            "id": 9286,
+                            "title": "Access to Justice",
+                            "type": {
+                                "id": 1,
+                                "name": "Inquiry",
+                                "isInquiry": true,
+                                "description": "Inquiries allow committees to consider oral and written evidence on a particular topic. They usually result in the publication of a report."
+                            },
+                            "openDate": "2025-07-23T00:00:00",
+                            "closeDate": null,
+                            "latestReport": null,
+                            "openSubmissionPeriods": [],
+                            "closedSubmissionPeriods": [],
+                            "nextOralEvidenceSession": null,
+                            "contact": {
+                                "email": "justicecom@parliament.uk",
+                                "phone": "0207 219 3939 (general enquiries)",
+                                "address": null,
+                                "contactDisclaimer": null
+                            }
+                        }
+                    ],
+                    "oralEvidences": [],
+                    "id": 36218,
+                    "name": null,
+                    "startDate": "2026-02-24T14:30:00",
+                    "endDate": "2026-02-24T15:30:00",
+                    "eventId": 26563,
+                    "isPrivate": false,
+                    "activityType": "Oral evidence",
+                    "attendees": [
+                        {
+                            "displayOrder": 1,
+                            "organisations": [
+                                {
+                                    "name": "Legal Services Consumer Panel",
+                                    "role": "Chair",
+                                    "idmsId": "https://id.parliament.uk/BbNXN0fk",
+                                    "cisId": 51007
+                                }
+                            ],
+                            "submitterType": 0,
+                            "additionalContext": null,
+                            "id": 33903,
+                            "personId": 116216,
+                            "name": "Tom Hayhoe",
+                            "photoUrl": null,
+                            "memberInfo": null
+                        },
+                        {
+                            "displayOrder": 2,
+                            "organisations": [
+                                {
+                                    "name": "Nottingham Law School, Nottingham Trent University",
+                                    "role": "Associate Professor",
+                                    "idmsId": null,
+                                    "cisId": 96222
+                                }
+                            ],
+                            "submitterType": 0,
+                            "additionalContext": null,
+                            "id": 33904,
+                            "personId": 79089,
+                            "name": "Dr Liz Curran",
+                            "photoUrl": null,
+                            "memberInfo": null
+                        }
+                    ]
+                },
+                {
+                    "committeeBusinesses": [
+                        {
+                            "id": 9286,
+                            "title": "Access to Justice",
+                            "type": {
+                                "id": 1,
+                                "name": "Inquiry",
+                                "isInquiry": true,
+                                "description": "Inquiries allow committees to consider oral and written evidence on a particular topic. They usually result in the publication of a report."
+                            },
+                            "openDate": "2025-07-23T00:00:00",
+                            "closeDate": null,
+                            "latestReport": null,
+                            "openSubmissionPeriods": [],
+                            "closedSubmissionPeriods": [],
+                            "nextOralEvidenceSession": null,
+                            "contact": {
+                                "email": "justicecom@parliament.uk",
+                                "phone": "0207 219 3939 (general enquiries)",
+                                "address": null,
+                                "contactDisclaimer": null
+                            }
+                        }
+                    ],
+                    "oralEvidences": [],
+                    "id": 36219,
+                    "name": null,
+                    "startDate": "2026-02-24T15:30:00",
+                    "endDate": "2026-02-24T17:00:00",
+                    "eventId": 26563,
+                    "isPrivate": false,
+                    "activityType": "Oral evidence",
+                    "attendees": [
+                        {
+                            "displayOrder": 1,
+                            "organisations": [],
+                            "submitterType": 0,
+                            "additionalContext": null,
+                            "id": 33905,
+                            "personId": 97809,
+                            "name": "Dr John Sorabji",
+                            "photoUrl": null,
+                            "memberInfo": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "publications": [],
+    "news": [
+        {
+            "heading": "Call for evidence: Legislative scrutiny of the Courts and Tribunals Bill",
+            "teaser": "The Justice Committee has issued a call for evidence to inform its scrutiny of the Courts and Tribunals Bill.",
+            "intro": null,
+            "body": null,
+            "datePublished": "2026-02-27T12:11:51+00:00",
+            "imageUrl": "https://www.parliament.uk/globalassets/house-of-commons/news-story-image-template-1.png",
+            "imageAltText": "",
+            "thumbnailUrl": "https://www.parliament.uk/globalassets/house-of-commons/news-story-image-template-1.png?width=300&height=300&mode=crop",
+            "url": "https://committees.parliament.uk/committee/102/justice-committee/news/212216/call-for-evidence-legislative-scrutiny-of-the-courts-and-tribunals-bill/",
+            "id": 212216,
+            "source_committee_id": 102
+        },
+        {
+            "heading": "Justice Committee Chair comment: Courts and Tribunals Bill",
+            "teaser": "Chair of the Justice Committee and Labour MP Andy Slaughter said:",
+            "intro": null,
+            "body": null,
+            "datePublished": "2026-02-25T17:17:29+00:00",
+            "imageUrl": "https://www.parliament.uk/contentassets/1e458a6b7a9c43ea84c57364c98844c3/andy-slaughter-cred-hoc.jpeg",
+            "imageAltText": "",
+            "thumbnailUrl": "https://www.parliament.uk/contentassets/1e458a6b7a9c43ea84c57364c98844c3/andy-slaughter-cred-hoc.jpeg?width=300&height=300&mode=crop",
+            "url": "https://committees.parliament.uk/committee/102/justice-committee/news/212075/justice-committee-chair-comment-courts-and-tribunals-bill/",
+            "id": 212075,
+            "source_committee_id": 102
+        }
+    ]
+}
