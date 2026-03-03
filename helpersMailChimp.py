@@ -8,7 +8,7 @@ DATA_CENTRE = os.environ['DATA_CENTRE']
 AUDIENCE_ID = os.environ['AUDIENCE_ID']
 CAMPAIGN_FOLDER_ID = "5ed5be8d9a"
 
-GROUP_ID = "3da1d0b028"
+GROUP_ID = "2012540f09"
 BASE_URL = f"https://{DATA_CENTRE}.api.mailchimp.com/3.0"
 AUTH = ("jbanystring", API_KEY)  # Mailchimp uses HTTP Basic Auth
 

@@ -1,5 +1,6 @@
 import json
 import csv
+from datetime import datetime
 import os
 from lxml import html
 from lxml.html import builder as E
@@ -12,8 +13,21 @@ OUTPUT_DIR = 'HTMLs'
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
-def create_item_element(title, text, link, date=None, img_url=None):
-    """Creates a consistent HTML block for an item."""
+def create_meeting_element (title, link, witness_blocks=None):
+    """Creates a consistent HTML block for an item, now with optional witness lists."""
+    elements = []
+        
+    # Title as a link
+    elements.append(E.A(E.B(title), href=link, style="font-size: 1.1em; color: #005ea5; text-decoration: underline;"))
+    
+    # Add witness sections if they exist
+    if witness_blocks:
+        elements.extend(witness_blocks)
+    
+    return E.DIV(*elements, style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee;")
+
+def create_news_element(title, link, teaser_text, date_text, img_url=None):
+    """Creates a consistent HTML block for an item, now with optional witness lists."""
     elements = []
     
     if img_url:
@@ -21,17 +35,39 @@ def create_item_element(title, text, link, date=None, img_url=None):
     
     # Title as a link
     elements.append(E.A(E.B(title), href=link, style="font-size: 1.1em; color: #005ea5; text-decoration: underline;"))
-    
-    # Text and Date
-    display_text = f"{text}"
-    if date:
-        # Simple cleanup of ISO date strings for the email
-        clean_date = date.split('T')[0]
-        display_text += f" ({clean_date})"
-        
-    elements.append(E.P(display_text, style="margin-top: 5px; color: #333; font-size: 0.95em;"))
+
+    elements.append(E.P(teaser_text, style="margin-top: 5px; color: #333; font-size: 0.95em;"))
+
+    elements.append(E.P(date_text, style="margin-top: 5px; color: #333; font-size: 0.95em;"))
     
     return E.DIV(*elements, style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee;")
+
+def create_publication_element(title, link, date_text):
+    """Creates a consistent HTML block for an item, now with optional witness lists."""
+    elements = []
+        
+    # Title as a link
+    elements.append(E.A(E.B(title), href=link, style="font-size: 1.1em; color: #005ea5; text-decoration: underline;"))
+        
+    elements.append(E.P(date_text, style="margin-top: 5px; color: #333; font-size: 0.95em;"))
+    
+    return E.DIV(*elements, style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee;")
+
+def format_time(date_str):
+    """Converts ISO date string to HH:MMam/pm format."""
+    try:
+        dt = datetime.fromisoformat(date_str)
+        return dt.strftime("%I:%M%p").lower().lstrip('0')
+    except:
+        return ""
+
+def format_date(date_str):
+    """Converts ISO date string to d mmm yyyy format."""
+    try:
+        dt = datetime.fromisoformat(date_str)
+        return dt.strftime("%-d %b %Y")
+    except:
+        return ""
 
 def main():
     # 1. Load Data
@@ -87,11 +123,11 @@ def main():
         if c_pubs:
             content_blocks.append(E.H2("Reports this week", style="border-bottom: 2px solid #005ea5; padding-bottom: 5px;"))
             for item in c_pubs:
-                content_blocks.append(create_item_element(
-                    item.get('description'),
-                    "New Publication",
+                friendly_date = format_date(item.get('publicationStartDate'))
+                content_blocks.append(create_publication_element(
+                    item.get('description'), 
                     item.get('additionalContentUrl'),
-                    item.get('publicationStartDate')
+                    friendly_date
                 ))
 
         # --- Meetings Section ---
@@ -99,25 +135,76 @@ def main():
             content_blocks.append(E.H2("Public meetings this week", style="border-bottom: 2px solid #005ea5; padding-bottom: 5px;"))
             for item in c_events:
                 event_id = item.get('id')
-                # Formatted link as requested
                 link = f"https://committees.parliament.uk/event/{event_id}/formal-meeting-private-meeting/"
-                event_type_name = item.get('eventType', {}).get('name', 'Meeting')
-                content_blocks.append(create_item_element(
-                    event_type_name,
-                    "Committee Meeting",
+                
+                activities = item.get('activities', []) or []
+                oral_evidence_activities = [a for a in activities if a.get('activityType') == "Oral evidence"]
+                
+                # Determine Inquiry Title
+                inquiry_titles = {biz.get('title') for a in oral_evidence_activities for biz in a.get('committeeBusinesses', []) if biz.get('title')}
+                
+                date_string = item.get('startDate')
+                friendly_date = format_date(date_string)
+
+                if len(inquiry_titles) == 1:
+                    display_title = f"{friendly_date}: {list(inquiry_titles)[0]}"
+                elif len(inquiry_titles) > 1:
+                    display_title = f"{friendly_date}: multiple inquiries"
+                else:
+                    display_title = item.get('eventType', {}).get('name', 'Meeting')
+
+                # Build Witness Blocks
+                witness_blocks = []
+                for activity in oral_evidence_activities:
+                    time_str = format_time(activity.get('startDate'))
+                    attendee_lis = []
+                    
+                    for person in activity.get('attendees', []):
+                        name = person.get('name')
+                        orgs = person.get('organisations', [])
+                        context = person.get('additionalContext')
+                        
+                        if orgs:
+                            # Format: Name (Role at Organisation)
+                            role_info = f"{orgs[0].get('role')} at {orgs[0].get('name')}"
+                            attendee_lis.append(E.LI(f"{name} ({role_info})"))
+                        elif context:
+                            # Format: Name (AdditionalContext)
+                            attendee_lis.append(E.LI(f"{name} ({context})"))
+                        else:
+                            attendee_lis.append(E.LI(name))
+                    
+                    if attendee_lis:
+                        witness_blocks.append(
+                            E.DIV(
+                                E.DIV(
+                                    E.DIV(time_str, CLASS="attendee-time", style="font-weight: bold; margin-bottom: 5px;"),
+                                    E.UL(*attendee_lis, style="margin-top: 0;"),
+                                    CLASS="attendee"
+                                ),
+                                CLASS="activity",
+                                style="margin-top: 15px; font-size: 0.9em;"
+                            )
+                        )
+
+                content_blocks.append(create_meeting_element(
+                    display_title,
                     link,
-                    item.get('startDate')
+                    witness_blocks=witness_blocks
                 ))
 
         # --- News Section ---
         if c_news:
             content_blocks.append(E.H2("News this week", style="border-bottom: 2px solid #005ea5; padding-bottom: 5px;"))
             for item in c_news:
-                content_blocks.append(create_item_element(
+
+                friendly_date = format_date(item.get('datePublished'))
+
+                content_blocks.append(create_news_element(
                     item.get('heading'),
-                    item.get('teaser'),
                     item.get('url'),
-                    item.get('datePublished'), # Matched to your JSON key
+                    item.get('teaser'),
+                    friendly_date,
                     item.get('imageUrl')
                 ))
 
