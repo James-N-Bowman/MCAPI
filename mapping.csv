@@ -1,4 +1,5 @@
-cttee_id,cttee_name,campaign_id,interest_id
-290,Committee on Standards,a0ee568ff0,03b21db568
-365,Business and Trade Committee,fe1a17a7ad,9db32bd1c2
-102,Justice Committee,52655e6399,359a31705d
+cttee_id,cttee_name,interest_id
+365,Business and Trade Committee,9db32bd1c2
+102,Justice Committee,359a31705d
+664,Energy Security and Net Zero Committee,aed001cd33
+127,Public Accounts Committee,72222be023

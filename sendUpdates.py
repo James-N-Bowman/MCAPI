@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 
 from helpersCSVMapping import *
@@ -5,19 +6,6 @@ from helpersMailChimp import *
 
 MAPPING_FILE = 'mapping.csv'
 HTMLS_DIR = 'HTMLs'
-
-def send_html_to_campaign(campaign_id, html_content):
-    """Updates campaign content and triggers the send action."""
-    # 1. Update the Campaign Content
-    content_path = f"/campaigns/{campaign_id}/content" 
-    payload = {"html": html_content}
-    mailchimp_put(content_path, payload)
-
-    # 2. Send the Campaign
-    send_path = f"/campaigns/{campaign_id}/actions/send"
-    mailchimp_post(send_path)
-
-    print(f"Campaign {campaign_id} sent successfully.")
 
 def main():
     if not os.path.exists(MAPPING_CSV_FILEPATH):
@@ -34,7 +22,11 @@ def main():
                 continue
             
             cttee_id = row[0].strip()
-            campaign_id = row[2].strip()
+            cttee_name = row[1].strip()
+            interest_id = row[2].strip()
+
+            today = datetime.today()
+            campaign_title = str(today) + " " + cttee_name
             
             # Check if an HTML file exists for this committee
             html_file_path = os.path.join(HTMLS_DIR, f"{cttee_id}.html")
@@ -46,9 +38,17 @@ def main():
                     html_body = hf.read()
                 
                 try:
-                    send_html_to_campaign(campaign_id, html_body)
+                    create_and_send_weekly_email(
+                        interest_id, 
+                        campaign_title, 
+                        html_body, 
+                        folder_id=None,
+                        subject=DEFAULT_SUBJECT, 
+                        from_name=DEFAULT_FROM_NAME, 
+                        reply_to=DEFAULT_REPLY_TO
+                    )
                 except Exception as e:
-                    print(f"Error sending campaign {campaign_id} for committee {cttee_id}: {e}")
+                    print(f"Error sending campaign for committee {cttee_id}: {e}")
             else:
                 # If no HTML file was created by the previous script (no new data), we skip
                 print(f"No new updates for Committee {cttee_id} (No HTML file). Skipping.")

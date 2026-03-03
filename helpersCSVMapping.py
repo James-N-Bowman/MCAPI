@@ -3,7 +3,7 @@ import os
 
 MAPPING_CSV_FILEPATH = 'mapping.csv'
 
-def check_CSV_for_duplicates(cttee_id: int, campaign_id: str, interest_id: str) -> bool:
+def check_CSV_for_duplicates(cttee_id: int, interest_id: str) -> bool:
     """
     Checks whether any of the three values already exist in their respective
     columns in an existing CSV file. Also verifies the file can be opened for
@@ -42,7 +42,7 @@ def check_CSV_for_duplicates(cttee_id: int, campaign_id: str, interest_id: str) 
 
     for row in data_rows:
 
-        if len(row) < 4:
+        if len(row) < 3:
             continue  # skip malformed rows
 
         try:
@@ -52,11 +52,7 @@ def check_CSV_for_duplicates(cttee_id: int, campaign_id: str, interest_id: str) 
         except ValueError:
             pass  # non-integer in column; skip comparison
 
-        if row[2] == campaign_id:
-            print(f"Error: campaign_id '{campaign_id}' already exists in the file.")
-            return True
-
-        if row[3] == interest_id:
+        if row[2] == interest_id:
             print(f"Error: interest_id '{interest_id}' already exists in the file.")
             return True
 
@@ -80,7 +76,7 @@ def create_mapping_CSV ():
             print(f"Error: Could not create file at '{MAPPING_CSV_FILEPATH}': {e}")
         return    
 
-def write_to_mapping_CSV(cttee_id: int, cttee_name: str, campaign_id: str, interest_id: str) -> None:
+def write_to_mapping_CSV(cttee_id: int, cttee_name: str, interest_id: str) -> None:
     """
     Writes a new row (cttee_id, campaign_id, interest_id) to a CSV file.
 
@@ -93,7 +89,7 @@ def write_to_mapping_CSV(cttee_id: int, cttee_name: str, campaign_id: str, inter
     try:
         with open(MAPPING_CSV_FILEPATH, "a", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow([cttee_id, cttee_name, campaign_id, interest_id])
+            writer.writerow([cttee_id, cttee_name, interest_id])
         print(f"Row written successfully to '{MAPPING_CSV_FILEPATH}'.")
     except OSError as e:
         print(f"Error: Could not write to file '{MAPPING_CSV_FILEPATH}': {e}")
@@ -108,7 +104,7 @@ def fetch_cttee_ids_from_mapping_CSV ():
         committee_ids = {int(row[0]) for row in reader if row}
         return(committee_ids)
 
-def update_mapping_CSV(cttee_id: int, cttee_name: str, campaign_id: str, interest_id: str) -> None:
+def update_mapping_CSV(cttee_id: int, cttee_name: str, interest_id: str) -> None:
     """
     Writes a new row (cttee_id, campaign_id, interest_id) to a CSV file.
 
@@ -125,7 +121,7 @@ def update_mapping_CSV(cttee_id: int, cttee_name: str, campaign_id: str, interes
     """
     create_mapping_CSV()
 
-    if check_CSV_for_duplicates(cttee_id, campaign_id, interest_id):
+    if check_CSV_for_duplicates(cttee_id, interest_id):
         return
 
-    write_to_mapping_CSV(cttee_id, cttee_name, campaign_id, interest_id)
+    write_to_mapping_CSV(cttee_id, cttee_name, interest_id)

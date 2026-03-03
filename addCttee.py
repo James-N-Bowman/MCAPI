@@ -1,7 +1,7 @@
 import logging
 from helpersMailChimp import *
 from helpersCtteesAPI import *
-from helpersCSVMapping import *
+import helpersCSVMapping
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -25,10 +25,10 @@ def main():
     
     interest = create_group_interest(cttee_name)
     interest_id = interest.get("id")
-    campaign = create_campaign(interest_id, cttee_name)
-    campaign_id = campaign.get("id")
+    #campaign = create_campaign(interest_id, cttee_name)
+    #campaign_id = campaign.get("id")
 
-    update_mapping_CSV(cttee_id, cttee_name, campaign_id, interest_id)
+    helpersCSVMapping.update_mapping_CSV(cttee_id, cttee_name, interest_id) #campaign_id, interest_id)
 
 if __name__ == "__main__":
     main()

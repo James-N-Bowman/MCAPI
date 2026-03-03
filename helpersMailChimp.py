@@ -19,7 +19,7 @@ DEFAULT_REPLY_TO = "committeecorridor@parliament.uk"
 DEFAULT_SUBJECT = "Automated Committee Update"
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 
 # =========================
 # GET, PUSH, PUT HELPERS
@@ -201,33 +201,94 @@ def create_group_interest(name):
     )
     return interest
 
-def create_campaign(interest_id, campaign_title, subject=DEFAULT_SUBJECT, from_name=DEFAULT_FROM_NAME, reply_to=DEFAULT_REPLY_TO):
-    campaign = mailchimp_post(
-        "/campaigns",
-        {
-            "type": "regular",
-            "recipients": {
-                "list_id": AUDIENCE_ID,
-                "segment_opts": {
-                    "match": "all",
-                    "conditions": [
-                        {
-                            "condition_type": "Interests",
-                            "field": f"interests-{GROUP_ID}",
-                            "op": "interestcontains",
-                            "value": [interest_id]  # integer ID of the tag
-                        }
-                    ]
-                }
-            },
-            "settings": {
-                "title": campaign_title,
-                "subject_line": subject,
-                "from_name": from_name,
-                "reply_to": reply_to
-            }
-        }
-    )
-    return (campaign)
+def create_and_send_weekly_email(
+    interest_id, 
+    campaign_title, 
+    html_content, 
+    folder_id=None,
+    subject=DEFAULT_SUBJECT, 
+    from_name=DEFAULT_FROM_NAME, 
+    reply_to=DEFAULT_REPLY_TO
+):
+    """
+    Creates a new campaign for a specific interest, 
+    sets the HTML content, and sends it immediately.
+    """
+    
+    # 1. Setup the Campaign Settings
+    settings = {
+        "title": campaign_title,
+        "subject_line": subject,
+        "from_name": from_name,
+        "reply_to": reply_to
+    }
+    
+    # Add folder_id if provided to keep the UI clean
+    if folder_id:
+        settings["folder_id"] = folder_id
 
-list_all_campaigns()
+    # 2. CREATE the campaign
+    # This automatically scans the audience for the interest_id members
+    payload = {
+        "type": "regular",
+        "recipients": {
+            "list_id": AUDIENCE_ID,
+            "segment_opts": {
+                "match": "all",
+                "conditions": [
+                    {
+                        "condition_type": "Interests",
+                        "field": f"interests-{GROUP_ID}",
+                        "op": "interestcontains",
+                        "value": [interest_id]
+                    }
+                ]
+            }
+        },
+        "settings": settings
+    }
+    
+    campaign = mailchimp_post("/campaigns", payload)
+    campaign_id = campaign["id"]
+    logger.info(f"Created new campaign: {campaign_id}")
+
+    # 3. SET THE CONTENT
+    # We use the ID returned from the step above
+    mailchimp_put(f"/campaigns/{campaign_id}/content", {"html": html_content})
+    logger.info(f"HTML content uploaded to {campaign_id}")
+
+    # 4. SEND the campaign
+    # This fires the email to everyone currently in that interest group
+    mailchimp_post(f"/campaigns/{campaign_id}/actions/send")
+    
+    print(f"Success: '{campaign_title}' sent to interest {interest_id}!")
+    return campaign_id
+
+# =========================
+# RECALC HELPERS
+# =========================
+
+def recalculate_campaign_recipients (campaign_id):
+
+    # 1. Fetch the current campaign configuration
+    campaign = mailchimp_request("GET", f"/campaigns/{campaign_id}")
+
+    # 2. Extract the recipient settings
+    # This contains the 'segment_opts' which holds your Interest targeting
+    recipient_settings = campaign.get("recipients", {})
+
+    # 3. PATCH the campaign with its own recipient settings
+    # This mimics clicking "Review Segment" in the UI
+    payload = {
+        "recipients": recipient_settings
+    }
+
+    refreshed_campaign = mailchimp_request(
+        method="PATCH",
+        path=f"/campaigns/{campaign_id}",
+        payload=payload
+    )
+
+    print("Campaign recipients refreshed.")
+
+#recalculate_campaign_recipients ("404a9c607e")
