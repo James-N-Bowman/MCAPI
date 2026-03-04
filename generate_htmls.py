@@ -8,8 +8,8 @@ from lxml.html import builder as E
 # --- Setup ---
 JSON_FILE = 'parliament_data.json'
 MAPPING_FILE = 'mapping.csv'
-OUTPUT_DIR = 'HTMLs'
-INDEX_FILE = 'index.html'
+OUTPUT_DIR = 'docs/HTMLs'
+INDEX_FILE = 'docs/index.html'
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -234,7 +234,7 @@ def main():
     # --- 4. Generate the Index HTML File ---
     if generated_committees:
         index_items = []
-        base_url = "https://raw.githubusercontent.com/James-N-Bowman/AutomatedEmails/refs/heads/main/HTMLs/"
+        base_url = "https://james-n-bowman.github.io/AutomatedEmails/HTMLs/"
         
         for item in generated_committees:
             full_url = f"{base_url}{item['filename']}"
